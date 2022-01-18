@@ -2,7 +2,7 @@
 #include <stdio.h>
 typedef struct Node {
   size_t size;
-  int isFree; // 0 indicate not free 1 indicate free
+  //int isFree; // 0 indicate not free 1 indicate free
   struct Node * next;
   struct Node * prev;
 }Node;
@@ -22,7 +22,7 @@ Node* ff_get_free(size_t size);
 Node* bf_get_free(size_t size);
 void *ff_malloc(size_t size);
 void ff_free(void *ptr);
-void *bf_mallo(size_t size);
+void *bf_malloc(size_t size);
 void bf_free(void *ptr);
 
 unsigned long get_data_segment_size();
