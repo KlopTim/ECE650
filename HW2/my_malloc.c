@@ -189,16 +189,16 @@ void ts_free_lock(void *ptr) {
 /* ----------------------------- version2 begin ------------------------*/
 void *all_malloc_v2(size_t size) {
   if (head_v2 == NULL) {
-    Node* cur = expand_block(size);
+    Node* cur = expand_block_v2(size);
     return (void*)((char*)cur + sizeof(Node));
   }
 
   /* find a free block */
-  Node* cur = bf_get_free(size);
+  Node* cur = bf_get_free_v2(size);
 
   /*  cannot find a free block */
   if (cur == NULL) {
-    Node* cur = expand_block(size);
+    Node* cur = expand_block_v2(size);
     return (void*)((char*)cur + sizeof(Node));
   }
 
@@ -206,13 +206,13 @@ void *all_malloc_v2(size_t size) {
   // if the block is not big enough to split
   if (cur->size < size + sizeof(Node)) {
     //cur->isFree = 0;
-    remove_block(cur);
+    remove_block_v2(cur);
     return (void*)(sizeof(Node) + (char*)cur);
   }
   // else the block is big enough
   Node* newNode =(Node*)((char*)cur + sizeof(Node) + (cur->size - sizeof(Node) - size));
   cur->size -= sizeof(Node) + size;
-  set_default(newNode, size);
+  set_default_v2(newNode, size);
   return (void*)((char*)newNode + sizeof(Node));
 }
 
@@ -223,8 +223,8 @@ void all_free_v2(void* ptr) {
   //if (cur->isFree == 1) return;
   //cur->isFree = 1;
   /* Insert current block into the free list */
-  Insert_free(cur);
-  Merge_free(cur);
+  Insert_free_v2(cur);
+  Merge_free_v2(cur);
   //print_free_list();
 }
 
@@ -271,13 +271,13 @@ void Insert_free_v2(Node* node) {
 void Merge_free_v2(Node* cur) {
   char* p =  (char*)cur + sizeof(Node) + cur->size;
   if (cur->next != NULL && p == (char*)cur->next) {
-    Merge_two_free(cur, cur->next);
+    Merge_two_free_v2(cur, cur->next);
   }
   Node* prev = cur->prev;
   if (prev != NULL) {
     p = (char*)prev + sizeof(Node) + prev->size;
     if (p == (char*)cur) {
-      Merge_two_free(prev, cur);
+      Merge_two_free_v2(prev, cur);
     }
   }
 }
@@ -296,7 +296,7 @@ Node * expand_block_v2(size_t size) {
   sbrk(sizeof(Node) + size);
   pthread_mutex_unlock(&lock);
   Node * cur = (Node*)p;
-  set_default(cur, size);
+  set_default_v2(cur, size);
   return cur;
 }
 
