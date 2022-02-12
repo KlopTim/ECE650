@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <time.h>  
 #include "abstract.h"
 #include "potato.h"
 
@@ -15,15 +16,9 @@ int main(int argc, char * argv[]) {
         printf("Three command line arguments are required\n");
         return EXIT_FAILURE;
     }
-    int status;
+
     int socket_fd;
-    int yes = 1;
-    struct addrinfo hints;
-    struct addrinfo *p; // temporary variable for getting socket descriptop
-    struct addrinfo *host_info_list;
     const char *hostname = NULL;
-    struct sockaddr_storage player_socket_addr;
-    socklen_t player_socket_addr_len = sizeof(player_socket_addr);
     
     // input arguement
     const char * port = argv[1];
@@ -33,8 +28,8 @@ int main(int argc, char * argv[]) {
         fprintf(stderr, "player number should be greater than 0\n");
         return EXIT_FAILURE;
     }
-    if (num_hops <= 0) {
-        fprintf(stderr, "hop number should be greater than or equal to 0\n");
+    if (num_hops < 0 || num_hops > 512) {
+        fprintf(stderr, "Invalid hop number\n");
         return EXIT_FAILURE;
     }
     // player_fd & player_addr(sockaddr_storage type)
@@ -71,30 +66,21 @@ int main(int argc, char * argv[]) {
     }
     /* receiving ending */
 
-    /*
-    for (int i = 0; i < num_players; i++) {
-        printf("player id: %d\n", i);
-        printf("host: %s\n", player_host[i]); 
-        printf("service: %s\n", player_serv[i]); 
-    }
-    */
+
 
     /* send each player its neighbors' port*/
     
     for (int i = 0; i < num_players; i++) {
         // calculate left and right neighbor index
         int left = (i - 1 + num_players) % num_players;
-        //int right = (i + 1 + num_players) % num_players;
         // send left neighbor host and port
         send(player_fd[i], &player_host[left], 1024, 0);
         send(player_fd[i], &player_serv[left], 20, 0);
-        // send right neighbor host and port
-        //send(player_fd[i], player_host[right], 1024, 0);
-        //send(player_fd[i], &player_serv[right], 20, 0);
     }
     
     /* finishing sending */
-    //set rand
+    // set rand
+    srand((unsigned int)time(NULL));
     /* begin playing the game */
     // create a potato
     potato hot_potato;
@@ -126,7 +112,7 @@ int main(int argc, char * argv[]) {
     }
     // trace routh
     printf("Trace of potato:\n");
-    for (int i = 0; i <= hot_potato.hop; i++) {
+    for (int i = 0; i < hot_potato.size; i++) {
         if (i != 0) printf(",");
         printf("%d", hot_potato.routh[i]);
     }
@@ -136,8 +122,7 @@ int main(int argc, char * argv[]) {
     /* send a special potato to end the game */
     for (int i = 0; i < num_players; i++) {
         potato new_hot_potato;
-        new_hot_potato.hop = -1;
-        new_hot_potato.size = -1;
+        new_hot_potato.hop = 0;
         send(player_fd[i], &new_hot_potato, sizeof(new_hot_potato), 0);
     }
     /* ending */

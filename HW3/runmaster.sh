@@ -2,7 +2,7 @@
 
 sleep 1 
 
-./ringmaster 4444 5 10 & 
+./ringmaster 4444 3 10 & 
 
 
 wait
