@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     /* become a server */
     char my_host[1024];
     char my_service[20];
-    int myService_fd = create_service("0.0.0.0","", my_host, 1024, my_service, 20);
+    int myService_fd = create_service_autoPort(my_host, 1024, my_service, 20);
     /* already a server */
 
 

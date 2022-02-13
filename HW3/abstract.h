@@ -52,9 +52,60 @@ int connect_to(const char* hostname, const char* port) {
 }
 
 
+int create_service_autoPort(char *host, size_t hostlen, char *serv, size_t servlen) {
+    int socket_fd;
+    int status;
+    int yes = 1;
 
+    // get socket descriptor
+    socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (socket_fd < 0) {
+        fprintf(stderr, "Error: cannot create socket\n");
+        exit(EXIT_FAILURE);
+    }
+    // avoid message: address already in use
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+        fprintf(stderr, "setsockopt\n");
+        exit(EXIT_FAILURE);
+    }
+    // if there are no specific port number, randomly assign one.
+    struct sockaddr_in addr_auto;
+    socklen_t socklen;
+    addr_auto.sin_family = AF_INET;
+    addr_auto.sin_port = 0; // auto port
+    addr_auto.sin_addr.s_addr = INADDR_ANY;
+    socklen = sizeof(addr_auto);
 
-int create_service(const char * hostname, const char * port, char *host, size_t hostlen, char *serv, size_t servlen) {
+    status = bind(socket_fd, (struct sockaddr *)&addr_auto, socklen);
+    // check if bind success
+    if (status == -1) {
+        fprintf(stderr, "Error: fail to bind\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // listen
+    status = listen(socket_fd, 100);
+    if (status == -1) {
+        fprintf(stderr, "Error: fail to listen\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // return back the hostname and port
+    // get hostname
+    gethostname(host, hostlen);
+    struct sockaddr_in addr;
+    socklen_t len = sizeof(addr);
+    if (getsockname(socket_fd, (struct sockaddr *)&addr, &len) == -1) {
+        printf("Error: cannot getsockname\n");
+        exit(EXIT_FAILURE);
+    }
+    int port_num = ntohs(addr.sin_port);
+    sprintf(serv, "%d", port_num);
+
+    return socket_fd;
+}
+
+int create_service(const char * hostname, const char * port) {
     int socket_fd;
     int status;
     struct addrinfo hints;
@@ -72,14 +123,11 @@ int create_service(const char * hostname, const char * port, char *host, size_t 
         exit(EXIT_FAILURE);
     }
 
-    if (strcmp(port, "") == 0) {
-        struct sockaddr_in * addr_in = (struct sockaddr_in *)(host_info_list->ai_addr);
-        addr_in->sin_port = 0;
-    }
-
     // get socket descriptor
     for (p = host_info_list; p != NULL; p = p->ai_next) {
+        // if there are no specific port number, randomly assign one.
         socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        //socket_fd = socket(AF_INET, SOCK_STREAM, 0);
         if (socket_fd < 0) {
             continue;
         }
@@ -107,22 +155,6 @@ int create_service(const char * hostname, const char * port, char *host, size_t 
         fprintf(stderr, "Error: fail to listen\n");
         exit(EXIT_FAILURE);
     }
-
-    // return back the hostname and port
-    
-    if (host != NULL && serv != NULL)  {
-        // get hostname
-        gethostname(host, hostlen);
-        struct sockaddr_in addr;
-        socklen_t len = sizeof(addr);
-        if (getsockname(socket_fd, (struct sockaddr *)&addr, &len) == -1) {
-            printf("Error: cannot getsockname\n");
-            exit(EXIT_FAILURE);
-        }
-        int port_num = ntohs(addr.sin_port);
-        sprintf(serv, "%d", port_num);
-    }
-
 
     freeaddrinfo(host_info_list); // all done with this
     return socket_fd;

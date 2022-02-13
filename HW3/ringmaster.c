@@ -42,7 +42,7 @@ int main(int argc, char * argv[]) {
     printf("Hops = %d\n", num_hops);
 
     /* become a server */
-    socket_fd = create_service(hostname, port, NULL, 0, NULL, 0);
+    socket_fd = create_service(hostname, port);
     /* already become a server */
 
 
