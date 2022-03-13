@@ -8,6 +8,12 @@ using namespace pqxx;
 #ifndef _QUERY_FUNCS_
 #define _QUERY_FUNCS_
 
+void drop_table(connection *C);
+void create_player_table(connection *C);
+void create_state_table(connection *C);
+void create_color_table(connection *C);
+void create_team_table(connection *C);
+
 void add_player(connection *C, int team_id, int jersey_num, string first_name, string last_name,
 		int mpg, int ppg, int rpg, int apg, double spg, double bpg);
 
