@@ -1,4 +1,5 @@
 #include "query_funcs.h"
+#include <iomanip>
 
 void drop_table(connection *C) {
     /* Create SQL statement */
@@ -162,35 +163,53 @@ void query1(connection *C,
         int use_bpg, double min_bpg, double max_bpg
             ) {
     /* Create SQL statement */
-    string sql = "SELECT * from PLAYER WHERE ";
+    string sql = "SELECT * from PLAYER ";
     bool first = true;
     if (use_mpg != 0) {
-        if (first) first = false;
+        if (first) {
+            sql += " WHERE ";
+            first = false;
+        }
         else sql += " AND ";
         sql +=  "MPG >= " + to_string(min_mpg) + " AND MPG <= " + to_string(max_mpg) + " ";
     }
     if (use_ppg != 0) {
-        if (first) first = false;
+        if (first) {
+            sql += " WHERE ";
+            first = false;
+        }
         else sql += " AND ";
         sql += "PPG >= " + to_string(min_ppg) + " AND PPG <= " + to_string(max_ppg) + " ";
     }
     if (use_rpg != 0) {
-        if (first) first = false;
+        if (first) {
+            sql += " WHERE ";
+            first = false;
+        }
         else sql += " AND ";
         sql +=  "RPG >= " + to_string(min_rpg) + " AND RPG <= " + to_string(max_rpg) + " ";
     }
     if (use_apg != 0) {
-        if (first) first = false;
+        if (first) {
+            sql += " WHERE ";
+            first = false;
+        }
         else sql += " AND ";
         sql +=  "APG >= " + to_string(min_apg) + " AND APG <= " + to_string(max_apg) + " ";
     }
     if (use_spg != 0) {
-        if (first) first = false;
+        if (first) {
+            sql += " WHERE ";
+            first = false;
+        }
         else sql += " AND ";
         sql +=  "SPG >= " + to_string(min_spg) + " AND SPG <= " + to_string(max_spg) + " ";
     }
     if (use_bpg != 0) {
-        if (first) first = false;
+        if (first) {
+            sql += " WHERE ";
+            first = false;
+        }
         else sql += " AND ";
         sql +=  "BPG >= " + to_string(min_bpg) + " AND BPG <= " + to_string(max_bpg) + " ";
     }
@@ -214,8 +233,8 @@ void query1(connection *C,
       cout << " " << c[6].as<int>();
       cout << " " << c[7].as<int>();
       cout << " " << c[8].as<int>();
-      cout << " " << c[9].as<double>();
-      cout << " " << c[10].as<double>();
+      cout << " " << fixed << setprecision(1) << c[9].as<double>();
+      cout << " " << fixed << setprecision(1) << c[10].as<double>();
       cout << endl;
     }
 }
@@ -283,12 +302,12 @@ void query4(connection *C, string team_state, string team_color) {
     /* Execute SQL query */
     result R( N.exec( sql ));
       
-    cout<<"FIRST_NAME LAST_NAME UNIFORM_NUM"<<endl;
+    cout<<"UNIFORM_NUM FIRST_NAME LAST_NAME"<<endl;
     /* List down all the records */
     for (result::const_iterator c = R.begin(); c != R.end(); c++) {
+      cout << c[2].as<int>() << " ";
       cout << c[0].as<string>() << " ";
-      cout << c[1].as<string>() << " ";
-      cout << c[2].as<int>();
+      cout << c[1].as<string>();
       cout << endl;
     }
 }
