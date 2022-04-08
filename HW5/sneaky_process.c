@@ -1,11 +1,13 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
 void print_PID() {
     printf("sneaky_process pid = %d\n", getpid());
 }
 
-void cpfule(const char * fname_source, const char * fname_dest) {
+void cpfile(const char * fname_source, const char * fname_dest) {
     char ch;
     FILE * sf = fopen(fname_source, "r");
     FILE * df = fopen(fname_dest, "w");
@@ -18,8 +20,8 @@ void cpfule(const char * fname_source, const char * fname_dest) {
 
 void addMsg(const char * fname, const char * msg) {
     FILE * f = fopen(fname, "a");
-    int len = strlen(msg);
-    for (int i = 0; i < strlen; i++) {
+    size_t len = strlen(msg);
+    for (size_t i = 0; i < len; i++) {
         fputc(msg[i], f);
     }
     fclose(f);
