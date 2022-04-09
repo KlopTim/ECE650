@@ -29,7 +29,7 @@ void addMsg(const char * fname, const char * msg) {
 
 void loadModule() {
     char buf[100];
-    sprintf(buf, "insmod sneaky_mod.ko pid=%d", (int)getpid());
+    sprintf(buf, "insmod sneaky_mod.ko pid=%d", getpid());
     system(buf);
 }
 
